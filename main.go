@@ -22,7 +22,8 @@ func main() {
 
 	flag.Parse()
 
-	http.HandleFunc("/", floderServer.HandleSharedFile)
+	http.HandleFunc(*floderServer.Url_prefix+"/", floderServer.HandleSharedFile)
+	http.Handle(*floderServer.Url_prefix+"/changeRootPath", http.HandlerFunc(floderServer.ChangeRootPath))
 	//http.Handle("/echoVideo", http.HandlerFunc(floderServer.HandleSharedFile))
 	//http.Handle("/uploadVideo", http.HandlerFunc(videoToImg.UploadVideo))
 

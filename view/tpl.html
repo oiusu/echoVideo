@@ -69,7 +69,24 @@
 <body>
 <h2>Index of {{.Name}}</h2>
 
-
+<form enctype="multipart/form-data" action="/echoVideo/changeRootPath" method="post">
+    <div class="list">
+        <table summary="Directory Listing" cellpadding="0" cellspacing="0">
+            <thead>
+            <tr>
+                <th class="dl">rootPath</th>
+                <th class="dl">submit</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td class="dl"><input type="text" name="rootPath" style="width:600px;" value="{{.RootPath}}"/></td>
+                <td class="dl"><input type="submit" value="list" /></td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</form>
 
 <div class="list">
     <table summary="Directory Listing" cellpadding="0" cellspacing="0">
@@ -82,7 +99,12 @@
         </thead>
         <tbody>
         <tr>
-            <td class="n"><a href="../">Parent Directory</a>/</td>
+            <td class="n">
+
+                {{/*<a href="../">Parent Directory</a>/*/}}
+                <a href="{{.ParentPath}}">Parent Directory</a>/
+
+            </td>
             <td class="t">Directory</td>
             <td class="dl"></td>
         </tr>
