@@ -22,18 +22,12 @@ func main() {
 
 	flag.Parse()
 
-	http.HandleFunc("/echoVideo", floderServer.HandleSharedFile)
+	http.HandleFunc("/", floderServer.HandleSharedFile)
 	//http.Handle("/echoVideo", http.HandlerFunc(floderServer.HandleSharedFile))
 	//http.Handle("/uploadVideo", http.HandlerFunc(videoToImg.UploadVideo))
 
 	http.ListenAndServe((*bind), nil)
 	fmt.Println("server start success ... ")
-
-
-
-
-
-
 
 	//server := http.Server{
 	//	Addr:        ":1718",

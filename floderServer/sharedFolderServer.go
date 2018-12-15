@@ -63,7 +63,9 @@ func handleDirectory(f *os.File, w http.ResponseWriter, req *http.Request) {
 	// First, check if there is any index in this folder.
 	for _, val := range names {
 		if val.Name() == "index.html" {
-			serveFile(path.Join(f.Name(), "index.html"), w, req)
+			serverVideo(path.Join(f.Name(), "index.html"), w, req)
+			//serveFile(path.Join(f.Name(), "index.html"), w, req)
+
 			return
 		}
 	}
@@ -104,6 +106,50 @@ func handleDirectory(f *os.File, w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
+}
+
+func serverVideo(filepath string, w http.ResponseWriter, req *http.Request) {
+	// Opening the file handle
+	f, err := os.Open(filepath)
+	if err != nil {
+		http.Error(w, "404 Not Found : Error while opening the file.", 404)
+		return
+	}
+
+	defer f.Close()
+
+	// Checking if the opened handle is really a file
+	statinfo, err := f.Stat()
+	if err != nil {
+		http.Error(w, "500 Internal Error : stat() failure.", 500)
+		return
+	}
+
+	if statinfo.IsDir() { // If it's a directory, open it !
+		handleDirectory(f, w, req)
+		return
+	}
+
+	if (statinfo.Mode() &^ 07777) == os.ModeSocket { // If it's a socket, forbid it !
+		http.Error(w, "403 Forbidden : you can't access this resource.", 403)
+		return
+	}
+	// Content-Type handling
+	query, err := url.ParseQuery(req.URL.RawQuery)
+
+	if err == nil && len(query["dl"]) > 0 { // The user explicitedly wanted to download the file (Dropbox style!)
+		w.Header().Set("Content-Type", "application/octet-stream")
+	} else {
+		// Fetching file's mimetype and giving it to the browser
+		if mimetype := mime.TypeByExtension(path.Ext(filepath)); mimetype != "" {
+			w.Header().Set("Content-Type", mimetype)
+		} else {
+			w.Header().Set("Content-Type", "application/octet-stream")
+		}
+	}
+
+	http.ServeContent(w, req, filepath, time.Now(), f)
+
 }
 
 func serveFile(filepath string, w http.ResponseWriter, req *http.Request) {
@@ -221,12 +267,15 @@ func serveFile(filepath string, w http.ResponseWriter, req *http.Request) {
 
 func HandleSharedFile(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Server", serverUA)
-	filepath := path.Join((*root_folder), path.Clean(req.URL.Path))
-	serveFile(filepath, w, req)
+	reqPath := path.Clean(req.URL.Path)
+	//replace := strings.Replace(reqPath, "/echoVideo", "/", 1)
+	filepath := path.Join((*root_folder), reqPath)
+	//serveFile(filepath, w, req)
+	serverVideo(filepath, w, req)
 
 	fmt.Printf("\"%s %s %s\" \"%s\" \"%s\"\n",
 		req.Method,
-		req.URL.String(),
+		req.URL.Path,
 		req.Proto,
 		req.Referer(),
 		req.UserAgent()) // TODO: Improve this crappy logging
@@ -272,5 +321,3 @@ func parseRange(data string) int64 {
 
 	return stop
 }
-
-

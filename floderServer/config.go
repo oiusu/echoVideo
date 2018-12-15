@@ -13,8 +13,6 @@ var (
 	root_folder  *string // TODO: Find a way to be cleaner !
 	uses_gzip    *bool
 	template_dir *string
-
-
 )
 
 func init() {
@@ -29,7 +27,7 @@ func init() {
 	template_dir = new(string)
 	uses_gzip = new(bool)
 
-	*root_folder = cwd + "/echoVideo/"
+	*root_folder = "/Users/chenc/go/src/echoVideo/oss/"
 	*template_dir = cwd + "/view/"
 	*uses_gzip = true
 
