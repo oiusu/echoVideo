@@ -10,9 +10,7 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
-	"mime"
 	"net/http"
-	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -159,19 +157,19 @@ func serverVideo(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "403 Forbidden : you can't access this resource.", 403)
 		return
 	}
-	// Content-Type handling
-	query, err := url.ParseQuery(req.URL.RawQuery)
-
-	if err == nil && len(query["dl"]) > 0 { // The user explicitedly wanted to download the file (Dropbox style!)
-		w.Header().Set("Content-Type", "application/octet-stream")
-	} else {
-		// Fetching file's mimetype and giving it to the browser
-		if mimetype := mime.TypeByExtension(path.Ext(filepath)); mimetype != "" {
-			w.Header().Set("Content-Type", mimetype)
-		} else {
-			w.Header().Set("Content-Type", "application/octet-stream")
-		}
-	}
+	//// Content-Type handling
+	//query, err := url.ParseQuery(req.URL.RawQuery)
+	//
+	//if err == nil && len(query["dl"]) > 0 { // The user explicitedly wanted to download the file (Dropbox style!)
+	//	w.Header().Set("Content-Type", "application/octet-stream")
+	//} else {
+	//	// Fetching file's mimetype and giving it to the browser
+	//	if mimetype := mime.TypeByExtension(path.Ext(filepath)); mimetype != "" {
+	//		w.Header().Set("Content-Type", mimetype)
+	//	} else {
+	//		w.Header().Set("Content-Type", "application/octet-stream")
+	//	}
+	//}
 
 	http.ServeContent(w, req, filepath, time.Now(), f)
 

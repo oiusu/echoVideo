@@ -30,10 +30,17 @@ func init() {
 	Url_prefix = new(string)
 	uses_gzip = new(bool)
 
-	*root_folder = "/Users/chenc/go/src/echoVideo/oss/"
+	//*root_folder = "/Users/chenc/go/src/echoVideo/oss/"
+	*root_folder = "/data01/dataset/video_selected"
 	*template_dir = cwd + "/view/"
 	*uses_gzip = true
 	*Url_prefix = "/echoVideo"
+
+	f, err := os.Open(*root_folder)
+	if err != nil {
+		*root_folder = cwd
+	}
+	f.Close()
 
 	fmt.Printf("Sharing %s ...\n", *root_folder)
 }
@@ -43,6 +50,14 @@ func ChangeRootPath(w http.ResponseWriter, req *http.Request) {
 	if req.Method == "POST" {
 		req.ParseMultipartForm(32 << 20)
 		rootPath := req.FormValue("rootPath")
+
+		f, err := os.Open(rootPath)
+		if err != nil {
+			http.Error(w, "404 Not Found : Error while opening the file.", 404)
+			return
+		}
+		f.Close()
+
 		*root_folder = rootPath
 
 		//reqPath := path.Clean(req.URL.Path)

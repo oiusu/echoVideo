@@ -21,7 +21,7 @@ HOST=192.168.55.98
 #do
 echo "deploy $HOST"
 
-ssh  ${user_name}@${HOST} "mkdir -p ${prodPath}/view;mkdir -p ${prodPath}/echoVideo; "
+ssh  ${user_name}@${HOST} "mkdir -p ${prodPath}/view; "
 echo "mkdir from server..."
 scp   echoVideo  ${user_name}@${HOST}:${prodPath}
 scp     ./view/tpl.html  ${user_name}@${HOST}:${prodPath}/view
