@@ -31,7 +31,7 @@ func init() {
 	uses_gzip = new(bool)
 
 	//*root_folder = "/Users/chenc/go/src/echoVideo/oss/"
-	*root_folder = "/data01/dataset/video_selected"
+	*root_folder = "/data01/dataset/video_selected.bak"
 	*template_dir = cwd + "/view/"
 	*uses_gzip = true
 	*Url_prefix = "/echoVideo"

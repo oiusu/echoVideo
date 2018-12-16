@@ -10,7 +10,9 @@ import (
 	"bytes"
 	"container/list"
 	"fmt"
+	"mime"
 	"net/http"
+	"net/url"
 	"os"
 	"path"
 	"strings"
@@ -54,18 +56,22 @@ func copyToArray(src *list.List) []string {
 	return dst
 }
 
+func HandleSharedFile(w http.ResponseWriter, req *http.Request) {
+	w.Header().Set("Server", serverUA)
+
+	//serveFile(filepath, w, req)
+	serverVideo(w, req)
+
+	fmt.Printf("\"%s %s %s\" \"%s\" \"%s\"\n",
+		req.Method,
+		req.URL.Path,
+		req.Proto,
+		req.Referer(),
+		req.UserAgent()) // TODO: Improve this crappy logging
+}
+
 func handleDirectory(f *os.File, w http.ResponseWriter, req *http.Request, trimReqPath string) {
 	names, _ := f.Readdir(-1)
-
-	// First, check if there is any index in this folder.
-	//for _, val := range names {
-	//	if val.Name() == "index.html" {
-	//		serverVideo(path.Join(f.Name(), "index.html"), w, req)
-	//		//serveFile(path.Join(f.Name(), "index.html"), w, req)
-	//
-	//		return
-	//	}
-	//}
 
 	// Otherwise, generate folder content.
 	children_dir_tmp := list.New()
@@ -121,6 +127,10 @@ func handleDirectory(f *os.File, w http.ResponseWriter, req *http.Request, trimR
 	}
 }
 
+//func getPathSuffix(path string) string{
+//	path
+//}
+
 func serverVideo(w http.ResponseWriter, req *http.Request) {
 
 	reqPath := path.Clean(req.URL.Path)
@@ -157,19 +167,26 @@ func serverVideo(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, "403 Forbidden : you can't access this resource.", 403)
 		return
 	}
-	//// Content-Type handling
-	//query, err := url.ParseQuery(req.URL.RawQuery)
-	//
-	//if err == nil && len(query["dl"]) > 0 { // The user explicitedly wanted to download the file (Dropbox style!)
-	//	w.Header().Set("Content-Type", "application/octet-stream")
-	//} else {
-	//	// Fetching file's mimetype and giving it to the browser
-	//	if mimetype := mime.TypeByExtension(path.Ext(filepath)); mimetype != "" {
-	//		w.Header().Set("Content-Type", mimetype)
-	//	} else {
-	//		w.Header().Set("Content-Type", "application/octet-stream")
-	//	}
-	//}
+	// Content-Type handling
+	query, err := url.ParseQuery(req.URL.RawQuery)
+
+	if err == nil && len(query["dl"]) > 0 { // The user explicitedly wanted to download the file (Dropbox style!)
+		w.Header().Set("Content-Type", "application/octet-stream")
+	} else {
+		// Fetching file's mimetype and giving it to the browser
+		ext := path.Ext(filepath)
+		//fmt.Println("ext="+ext)
+		if mimetype := mime.TypeByExtension(ext); mimetype != "" {
+			if ext == ".avi" || ext == ".MP4" {
+				//todo .avi 需要手动指定
+				w.Header().Set("Content-Type", "video/mp4")
+			} else {
+				w.Header().Set("Content-Type", mimetype)
+			}
+		} else {
+			w.Header().Set("Content-Type", "application/octet-stream")
+		}
+	}
 
 	http.ServeContent(w, req, filepath, time.Now(), f)
 
@@ -288,57 +305,43 @@ func serverVideo(w http.ResponseWriter, req *http.Request) {
 //	f.Close()
 //}
 
-func HandleSharedFile(w http.ResponseWriter, req *http.Request) {
-	w.Header().Set("Server", serverUA)
+//func parseCSV(data string) []string {
+//	splitted := strings.SplitN(data, ",", -1)
+//
+//	data_tmp := make([]string, len(splitted))
+//
+//	for i, val := range splitted {
+//		data_tmp[i] = strings.TrimSpace(val)
+//	}
+//
+//	return data_tmp
+//}
 
-	//serveFile(filepath, w, req)
-	serverVideo(w, req)
-
-	fmt.Printf("\"%s %s %s\" \"%s\" \"%s\"\n",
-		req.Method,
-		req.URL.Path,
-		req.Proto,
-		req.Referer(),
-		req.UserAgent()) // TODO: Improve this crappy logging
-}
-
-func parseCSV(data string) []string {
-	splitted := strings.SplitN(data, ",", -1)
-
-	data_tmp := make([]string, len(splitted))
-
-	for i, val := range splitted {
-		data_tmp[i] = strings.TrimSpace(val)
-	}
-
-	return data_tmp
-}
-
-func parseRange(data string) int64 {
-	stop := (int64)(0)
-	part := 0
-	for i := 0; i < len(data) && part < 2; i = i + 1 {
-		if part == 0 { // part = 0 <=> equal isn't met.
-			if data[i] == '=' {
-				part = 1
-			}
-
-			continue
-		}
-
-		if part == 1 { // part = 1 <=> we've met the equal, parse beginning
-			if data[i] == ',' || data[i] == '-' {
-				part = 2 // part = 2 <=> OK DUDE.
-			} else {
-				if 48 <= data[i] && data[i] <= 57 { // If it's a digit ...
-					// ... convert the char to integer and add it!
-					stop = (stop * 10) + (((int64)(data[i])) - 48)
-				} else {
-					part = 2 // Parsing error! No error needed : 0 = from start.
-				}
-			}
-		}
-	}
-
-	return stop
-}
+//func parseRange(data string) int64 {
+//	stop := (int64)(0)
+//	part := 0
+//	for i := 0; i < len(data) && part < 2; i = i + 1 {
+//		if part == 0 { // part = 0 <=> equal isn't met.
+//			if data[i] == '=' {
+//				part = 1
+//			}
+//
+//			continue
+//		}
+//
+//		if part == 1 { // part = 1 <=> we've met the equal, parse beginning
+//			if data[i] == ',' || data[i] == '-' {
+//				part = 2 // part = 2 <=> OK DUDE.
+//			} else {
+//				if 48 <= data[i] && data[i] <= 57 { // If it's a digit ...
+//					// ... convert the char to integer and add it!
+//					stop = (stop * 10) + (((int64)(data[i])) - 48)
+//				} else {
+//					part = 2 // Parsing error! No error needed : 0 = from start.
+//				}
+//			}
+//		}
+//	}
+//
+//	return stop
+//}
