@@ -26,9 +26,8 @@ func main() {
 	http.Handle(*floderServer.Url_prefix+"/changeRootPath", http.HandlerFunc(floderServer.ChangeRootPath))
 	//http.Handle("/echoVideo", http.HandlerFunc(floderServer.HandleSharedFile))
 	//http.Handle("/uploadVideo", http.HandlerFunc(videoToImg.UploadVideo))
-
+	fmt.Printf("server start success @  %s...   \n ", *bind)
 	http.ListenAndServe((*bind), nil)
-	fmt.Println("server start success ... ")
 
 	//server := http.Server{
 	//	Addr:        ":1718",

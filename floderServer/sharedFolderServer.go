@@ -175,16 +175,19 @@ func serverVideo(w http.ResponseWriter, req *http.Request) {
 	} else {
 		// Fetching file's mimetype and giving it to the browser
 		ext := path.Ext(filepath)
-		//fmt.Println("ext="+ext)
+		fmt.Printf("ext=%s \n", ext)
 		if mimetype := mime.TypeByExtension(ext); mimetype != "" {
 			if ext == ".avi" || ext == ".MP4" {
 				//todo .avi 需要手动指定
 				w.Header().Set("Content-Type", "video/mp4")
+				//fmt.Printf("set Content-Type video/mp4 , req.URL.Path=%s \n",req.URL.Path)
 			} else {
 				w.Header().Set("Content-Type", mimetype)
+				//fmt.Printf("set Content-Type %s , req.URL.Path=%s \n",mimetype,req.URL.Path)
 			}
 		} else {
 			w.Header().Set("Content-Type", "application/octet-stream")
+			//fmt.Printf("set Content-Type application/octet-stream ,req.URL.Path=%s \n",req.URL.Path)
 		}
 	}
 
