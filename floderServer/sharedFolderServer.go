@@ -25,7 +25,7 @@ const (
 	fs_maxbufsize = 4096 // 4096 bits = default page size on OSX
 )
 
-/* Go is the first programming language with a templating engine embeddeed
+/* Go is the first programming language with a templating engine embeddeed  .
  * but with no min function. */
 func min(x int64, y int64) int64 {
 	if x < y {
