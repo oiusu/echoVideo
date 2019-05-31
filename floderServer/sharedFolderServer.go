@@ -25,7 +25,7 @@ const (
 	fs_maxbufsize = 4096 // 4096 bits = default page size on OSX
 )
 
-/* Go is the first programming language with a templating engine embeddeed  .
+/* Go is the first programming language with a templating engine embeddeed11
  * but with no min function. */
 func min(x int64, y int64) int64 {
 	if x < y {
@@ -92,7 +92,7 @@ func handleDirectory(f *os.File, w http.ResponseWriter, req *http.Request, trimR
 	// And transfer the content to the final array structure
 	children_dir := copyToArray(children_dir_tmp)
 	children_files := copyToArray(children_files_tmp)
-	// 获得父路径
+	// 获得父路径11
 	var parent_path string
 	path_arr := strings.Split(trimReqPath, "/")
 
